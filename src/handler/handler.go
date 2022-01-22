@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/fajryhamzah/reddit-downloader/src/client"
 	"github.com/fajryhamzah/reddit-downloader/src/data"
 	"github.com/fajryhamzah/reddit-downloader/src/semaphore"
 )
@@ -20,20 +21,12 @@ func Handle(links []string) {
 }
 
 func getResponse(link string) {
-	req, err := http.NewRequest("GET", link, nil)
+	response, err := client.Get(link)
 
-	if nil != err {
-		fmt.Printf("Failed to create request %s \n", link)
-		return
-	}
-
-	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36")
-
-	response, err := new(http.Client).Do(req)
-
-	if nil != err {
+	if nil != err || response.StatusCode != 200 {
 		fmt.Printf("Failed to retrieve data from %s \n", link)
 		fmt.Println("Detail :", err)
+		semaphore.GetWaitGroup().Done()
 		return
 	}
 
