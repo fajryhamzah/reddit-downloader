@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/fajryhamzah/reddit-downloader/src/handler"
+	"github.com/fajryhamzah/reddit-downloader/src/semaphore"
 )
 
 func main() {
@@ -17,6 +18,6 @@ func main() {
 
 	handler.Handle(links)
 
-	fmt.Scanln()
+	semaphore.GetWaitGroup().Wait()
 	fmt.Println("done")
 }

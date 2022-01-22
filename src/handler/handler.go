@@ -7,12 +7,14 @@ import (
 	"strings"
 
 	"github.com/fajryhamzah/reddit-downloader/src/data"
+	"github.com/fajryhamzah/reddit-downloader/src/semaphore"
 )
 
 func Handle(links []string) {
 	for _, link := range links {
 		jsonLink := strings.TrimSuffix(link, "/") + ".json"
 
+		semaphore.GetWaitGroup().Add(1)
 		go getResponse(jsonLink)
 	}
 }
@@ -41,4 +43,5 @@ func getResponse(link string) {
 	json.NewDecoder(response.Body).Decode(&decodedResponse)
 
 	fmt.Println(response.StatusCode, decodedResponse[0].Data.Children[0].Data)
+	semaphore.GetWaitGroup().Done()
 }
