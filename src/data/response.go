@@ -17,4 +17,5 @@ type mainDataResponse struct {
 	Author          string `json:"author"`
 	IsVideo         bool   `json:"is_video"`
 	UrlDestination  string `json:"url_overridden_by_dest"`
+	Permalink       string `json:"permalink"`
 }

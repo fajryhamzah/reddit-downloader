@@ -9,9 +9,10 @@ import (
 var imageHandler ImageHandler
 
 func GetHandler(response data.MainResponse) (MediaHandlerInterface, error) {
-	if !response.Data.Children[0].Data.IsVideo {
+	childrenData := response.Data.Children[0].Data
+	if !childrenData.IsVideo && childrenData.UrlDestination != "" {
 		return &imageHandler, nil
 	}
 
-	return nil, errors.New("Media is not supported")
+	return nil, errors.New("Media is not supported for " + childrenData.Permalink)
 }
