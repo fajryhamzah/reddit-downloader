@@ -2,14 +2,13 @@ package media
 
 import (
 	"fmt"
-	"io"
-	"os"
 	"path"
 
 	"github.com/fajryhamzah/reddit-downloader/src/client"
 	"github.com/fajryhamzah/reddit-downloader/src/data"
 	"github.com/fajryhamzah/reddit-downloader/src/log"
 	"github.com/fajryhamzah/reddit-downloader/src/semaphore"
+	"github.com/fajryhamzah/reddit-downloader/src/writer"
 )
 
 type ImageHandler struct {
@@ -40,20 +39,10 @@ func (i *ImageHandler) downloadFile(imageLink string, fileName string) {
 		return
 	}
 
-	file, err := os.Create(fileName)
+	err = writer.Write(fileName, response.Body)
 
 	if err != nil {
 		log.Error("Failed to create file", fileName)
-		semaphore.GetWaitGroup().Done()
-
-		return
-	}
-
-	defer file.Close()
-
-	_, err = io.Copy(file, response.Body)
-	if err != nil {
-		log.Error("Failed to write file", fileName)
 		semaphore.GetWaitGroup().Done()
 
 		return
