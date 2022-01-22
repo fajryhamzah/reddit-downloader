@@ -8,13 +8,14 @@ import (
 
 	"github.com/fajryhamzah/reddit-downloader/src/client"
 	"github.com/fajryhamzah/reddit-downloader/src/data"
+	"github.com/fajryhamzah/reddit-downloader/src/log"
 	"github.com/fajryhamzah/reddit-downloader/src/semaphore"
 )
 
 type ImageHandler struct {
 }
 
-const DEFAULT_IMAGE_DOWNLOAD_PATH = "result/images"
+const DEFAULT_IMAGE_DOWNLOAD_PATH string = "result/images"
 
 func (i *ImageHandler) Handle(response data.MainResponse) {
 	childrenResponse := response.Data.Children[0].Data
@@ -23,16 +24,17 @@ func (i *ImageHandler) Handle(response data.MainResponse) {
 
 	filePath := fmt.Sprintf("%s/%s_%s_%s_%s", DEFAULT_IMAGE_DOWNLOAD_PATH, childrenResponse.Subreddit, childrenResponse.Title, childrenResponse.Author, filename)
 
-	i.downloadFile(imageLink, filePath)
+	log.Logf("Downloading from %s/%s", childrenResponse.SubredditPrefix, childrenResponse.Title)
+	log.Logf("With Filename : %s", filePath)
 
-	semaphore.GetWaitGroup().Done()
+	i.downloadFile(imageLink, filePath)
 }
 
 func (i *ImageHandler) downloadFile(imageLink string, fileName string) {
 	response, err := client.Get(imageLink)
 
 	if nil != err {
-		fmt.Println("Failed to retrieve image", imageLink)
+		log.Error("Failed to retrieve image", imageLink)
 		semaphore.GetWaitGroup().Done()
 
 		return
@@ -41,7 +43,7 @@ func (i *ImageHandler) downloadFile(imageLink string, fileName string) {
 	file, err := os.Create(fileName)
 
 	if err != nil {
-		fmt.Println("Failed to create file", fileName)
+		log.Error("Failed to create file", fileName)
 		semaphore.GetWaitGroup().Done()
 
 		return
@@ -51,9 +53,12 @@ func (i *ImageHandler) downloadFile(imageLink string, fileName string) {
 
 	_, err = io.Copy(file, response.Body)
 	if err != nil {
-		fmt.Println("Failed to write file", fileName)
+		log.Error("Failed to write file", fileName)
 		semaphore.GetWaitGroup().Done()
 
 		return
 	}
+
+	log.Successf("%s downloaded.", fileName)
+	semaphore.GetWaitGroup().Done()
 }

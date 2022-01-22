@@ -2,12 +2,12 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"strings"
 
 	"github.com/fajryhamzah/reddit-downloader/src/client"
 	"github.com/fajryhamzah/reddit-downloader/src/data"
 	"github.com/fajryhamzah/reddit-downloader/src/handler/media"
+	"github.com/fajryhamzah/reddit-downloader/src/log"
 	"github.com/fajryhamzah/reddit-downloader/src/semaphore"
 )
 
@@ -24,8 +24,8 @@ func getResponse(link string) {
 	response, err := client.Get(link)
 
 	if nil != err || response.StatusCode != 200 {
-		fmt.Printf("Failed to retrieve data from %s \n", link)
-		fmt.Println("Detail :", err)
+		log.Errorf("Failed to retrieve data from %s", link)
+		log.Error("Detail :", err)
 		semaphore.GetWaitGroup().Done()
 		return
 	}
@@ -39,7 +39,7 @@ func getResponse(link string) {
 	handler, err = media.GetHandler(decodedResponse[0])
 
 	if nil != err {
-		fmt.Println(err)
+		log.Error(err)
 		semaphore.GetWaitGroup().Done()
 		return
 	}

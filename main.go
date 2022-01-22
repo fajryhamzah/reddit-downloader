@@ -2,9 +2,9 @@ package main
 
 import (
 	"flag"
-	"fmt"
 
 	"github.com/fajryhamzah/reddit-downloader/src/handler"
+	"github.com/fajryhamzah/reddit-downloader/src/log"
 	"github.com/fajryhamzah/reddit-downloader/src/semaphore"
 )
 
@@ -19,5 +19,5 @@ func main() {
 	handler.Handle(links)
 
 	semaphore.GetWaitGroup().Wait()
-	fmt.Println("done")
+	log.Success("DONE")
 }
