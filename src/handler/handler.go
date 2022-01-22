@@ -3,11 +3,11 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/fajryhamzah/reddit-downloader/src/client"
 	"github.com/fajryhamzah/reddit-downloader/src/data"
+	"github.com/fajryhamzah/reddit-downloader/src/handler/media"
 	"github.com/fajryhamzah/reddit-downloader/src/semaphore"
 )
 
@@ -35,6 +35,14 @@ func getResponse(link string) {
 	var decodedResponse []data.MainResponse
 	json.NewDecoder(response.Body).Decode(&decodedResponse)
 
-	fmt.Println(response.StatusCode, decodedResponse[0].Data.Children[0].Data)
-	semaphore.GetWaitGroup().Done()
+	var handler media.MediaHandlerInterface
+	handler, err = media.GetHandler(decodedResponse[0])
+
+	if nil != err {
+		fmt.Println(err)
+		semaphore.GetWaitGroup().Done()
+		return
+	}
+
+	go handler.Handle(decodedResponse[0])
 }
