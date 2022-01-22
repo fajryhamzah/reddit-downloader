@@ -7,10 +7,16 @@ import (
 )
 
 var imageHandler ImageHandler
+var videoHandler VideoHandler
 
 func GetHandler(response data.MainResponse) (MediaHandlerInterface, error) {
 	childrenData := response.Data.Children[0].Data
-	if !childrenData.IsVideo && childrenData.UrlDestination != "" {
+
+	if childrenData.IsVideo {
+		return &videoHandler, nil
+	}
+
+	if childrenData.UrlDestination != "" {
 		return &imageHandler, nil
 	}
 
