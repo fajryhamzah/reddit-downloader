@@ -1,6 +1,9 @@
 package client
 
-import "net/http"
+import (
+	"errors"
+	"net/http"
+)
 
 func Get(url string) (*http.Response, error) {
 	req, err := http.NewRequest("GET", url, nil)
@@ -13,8 +16,12 @@ func Get(url string) (*http.Response, error) {
 
 	response, err := new(http.Client).Do(req)
 
-	if nil != err || response.StatusCode != 200 {
+	if nil != err {
 		return nil, err
+	}
+
+	if response.StatusCode != 200 {
+		return nil, errors.New("Got status code " + response.Status)
 	}
 
 	return response, nil
