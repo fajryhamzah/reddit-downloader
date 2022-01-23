@@ -4,4 +4,6 @@ import "github.com/fajryhamzah/reddit-downloader/src/data"
 
 type MediaHandlerInterface interface {
 	Handle(response data.MainResponse)
+	IsSupported() bool
+	NotSupportedMessage() string
 }

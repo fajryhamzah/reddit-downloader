@@ -23,26 +23,36 @@ func (i *ImageHandler) Handle(response data.MainResponse) {
 
 	filePath := fmt.Sprintf("%s/%s_%s_%s_%s", DEFAULT_IMAGE_DOWNLOAD_PATH, childrenResponse.Subreddit, childrenResponse.Title, childrenResponse.Author, filename)
 
-	log.Logf("Downloading from %s/%s", childrenResponse.SubredditPrefix, childrenResponse.Title)
+	log.Logf("Downloading from %s", imageLink)
 	log.Logf("With Filename : %s", filePath)
 
 	i.downloadFile(imageLink, filePath)
+}
+
+func (i *ImageHandler) IsSupported() bool {
+	return true
+}
+
+func (i *ImageHandler) NotSupportedMessage() string {
+	return "Image not supported."
 }
 
 func (i *ImageHandler) downloadFile(imageLink string, fileName string) {
 	response, err := client.Get(imageLink)
 
 	if nil != err {
-		log.Error("Failed to retrieve image", imageLink)
+		log.Error("Failed to retrieve image", imageLink, err)
 		semaphore.GetWaitGroup().Done()
 
 		return
 	}
 
+	defer response.Body.Close()
+
 	err = writer.Write(fileName, response.Body)
 
 	if err != nil {
-		log.Error("Failed to create file", fileName)
+		log.Error("Failed to create file", fileName, err)
 		semaphore.GetWaitGroup().Done()
 
 		return
