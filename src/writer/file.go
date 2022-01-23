@@ -7,8 +7,7 @@ import (
 )
 
 func Write(fileName string, content io.Reader) error {
-	var blackList = regexp.MustCompile(`(&|>|<|\[|\]|:|\n|\r)*`)
-	fileName = blackList.ReplaceAllString(fileName, "")
+	fileName = EscapeFileName(fileName)
 
 	e := removeIfExist(fileName)
 
@@ -30,6 +29,12 @@ func Write(fileName string, content io.Reader) error {
 	}
 
 	return nil
+}
+
+func EscapeFileName(fileName string) string {
+	var blackList = regexp.MustCompile(`(&|>|<|\[|\]|:|\n|\r)*`)
+
+	return blackList.ReplaceAllString(fileName, "")
 }
 
 func removeIfExist(path string) error {

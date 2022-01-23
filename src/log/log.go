@@ -37,6 +37,13 @@ func Successf(format string, message ...interface{}) {
 	reset()
 }
 
+func Log(message ...interface{}) {
+	fmt.Print(string(BLUE), "[-] ")
+	fmt.Println(message...)
+
+	reset()
+}
+
 func Logf(format string, message ...interface{}) {
 	fmt.Print(string(BLUE), "[-] ")
 	printfln(format, message...)

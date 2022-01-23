@@ -1,9 +1,10 @@
 package media
 
 import (
+	"bytes"
 	"fmt"
-	"os"
 	"os/exec"
+	"runtime"
 
 	"github.com/fajryhamzah/reddit-downloader/src/client"
 	"github.com/fajryhamzah/reddit-downloader/src/data"
@@ -16,7 +17,7 @@ type VideoHandler struct{}
 
 const VIDEOS_PATH string = "result/videos"
 
-const TEMP_HLS_PATH string = "temp"
+const TEMP_DASH_PATH string = "temp"
 
 func (v *VideoHandler) Handle(response data.MainResponse) {
 	childrenResponse := response.Data.Children[0].Data
@@ -30,6 +31,10 @@ func (v *VideoHandler) Handle(response data.MainResponse) {
 }
 
 func (v *VideoHandler) IsSupported() bool {
+	if runtime.GOOS != "linux" {
+		return false
+	}
+
 	cmd := exec.Command("/bin/sh", "-c", "command", "-v", "ffmpeg")
 
 	if err := cmd.Run(); err != nil {
@@ -73,14 +78,23 @@ func (v *VideoHandler) downloadGIF(response data.DataResponse) {
 }
 
 func (v *VideoHandler) downloadVideo(response data.DataResponse) {
-	err := os.MkdirAll(TEMP_HLS_PATH, os.ModePerm)
+	link := response.SecureMedia.RedditVideo.HlsUrl
 
-	if nil != err {
-		log.Error("Failed to create temp file for video downloader")
+	filePath := fmt.Sprintf("%s/%s_%s_%s%s", VIDEOS_PATH, response.Subreddit, response.Title, response.Author, "test.%(ext)s")
+	log.Log("Starting to get video to ", filePath)
+	cmd := exec.Command("youtube-dl", "-o", filePath, link)
+
+	var out bytes.Buffer
+	cmd.Stdout = &out
+
+	if err := cmd.Run(); err != nil {
+		log.Error("Failed to run youtube-dl", err)
 		semaphore.GetWaitGroup().Done()
 
 		return
 	}
+
+	log.Log("Video Downloaded", response.SecureMedia.RedditVideo.HlsUrl)
 
 	semaphore.GetWaitGroup().Done()
 }
