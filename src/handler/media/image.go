@@ -2,6 +2,7 @@ package media
 
 import (
 	"fmt"
+	"os"
 	"path"
 
 	"github.com/fajryhamzah/reddit-downloader/src/client"
@@ -22,6 +23,15 @@ func (i *ImageHandler) Handle(response data.MainResponse) {
 	filename := path.Base(imageLink)
 
 	filePath := fmt.Sprintf("%s/%s_%s_%s_%s", DEFAULT_IMAGE_DOWNLOAD_PATH, childrenResponse.Subreddit, childrenResponse.Title, childrenResponse.Author, filename)
+
+	err := os.MkdirAll(DEFAULT_IMAGE_DOWNLOAD_PATH, os.ModePerm)
+
+	if nil != err {
+		log.Error("Failed to create image directory", err)
+		semaphore.GetWaitGroup().Done()
+
+		return
+	}
 
 	log.Logf("Downloading from %s", imageLink)
 	log.Logf("With Filename : %s", filePath)
